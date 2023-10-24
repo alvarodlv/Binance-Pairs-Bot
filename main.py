@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 from statsmodels.tsa.stattools import coint
 
-#hi
 
 # Initiate API object
 API = BinanceAPICalls(False)
