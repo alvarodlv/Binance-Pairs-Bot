@@ -10,11 +10,12 @@ from statsmodels.tsa.stattools import coint
 
 
 # Connect to Binance
-API = BinanceAPICalls(False)
+API = BinanceAPICalls(True)
 client = API.api_login()
 
 # Place market order to open/close positons
-
+order = API.place_market_order(client, symbol='BTCBUSD', side='SELL', order_type='MARKET', quantity=0.0005)
+info = API.get_order_info(client, order)
 
 # Abort all open orders
 
