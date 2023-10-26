@@ -101,3 +101,32 @@ class BinanceAPICalls:
         self.logger.info(f'[COMPLETE] Close prices for following symbols have been downloaded and stored: {symbols}')
         
         return data, returns
+    
+
+    def place_market_order(self,client, symbol, side, order_type, quantity):
+
+        self.logger.info(f'[START] Initiating trade order: Symbol: {symbol}; Quantity: {quantity}; Side: {side}; Type: {order_type}')
+        try:
+            order = client.order_market_buy(symbol=symbol,
+                                    side=side,
+                                    type=order_type,
+                                    quantity=quantity)
+            self.logger.info(f'[COMPLETE] Order placed.')
+        except:
+            self.logger.exception('[ERROR] Unable to place order.')
+            exit(1)
+        
+        return order
+    
+    def get_order_info(self, client, order):
+
+        symbol = order['symbol']
+        orderId = order['orderId']
+        self.logger.info(f'[START] Retrieving information for ID: {orderId} ')
+        try:
+            info = client.get_order(symbol=symbol, orderId=orderId)
+            self.logger.info(f'[COMPLETE] Order {orderId} information retrieved.')
+        except:
+            self.logger.exception('[ERROR] Unable to find trade.')
+
+        return info
