@@ -3,11 +3,10 @@ import time
 import pandas as pd
 import numpy as np
 
-from program.functions import initiate_logger, validate_key, format_number
+from functions import initiate_logger, validate_key, format_number
 from binance.client import Client
-from dotenv import load_dotenv
 from datetime import datetime as dt
-from program.constants import *
+from constants import KEY, SECRET
 
 class BinanceAPICalls:
     def __init__(self, testnet):

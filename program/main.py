@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 
-from program.binanceAPICalls import BinanceAPICalls
-from program.functions import print_json
+from binanceAPICalls import BinanceAPICalls
+from functions import print_json
 from statsmodels.tsa.stattools import coint
 from binance.enums import *
-from program.constants import *
+from constants import MODE, ABORT_ALL_POSITIONS
 
 
 # Download close prices for symbols
@@ -14,7 +14,8 @@ from program.constants import *
 # Connect to Binance
 API = BinanceAPICalls(True if MODE == 'TEST' else False)
 client = API.api_login()
-
+info = API.account(client)
+print(info)
 # Place market order to open/close positons
 
 
