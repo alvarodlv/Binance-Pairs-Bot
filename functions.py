@@ -29,3 +29,18 @@ def validate_key(logger, api_key, secret_key):
 
 def print_json(json_obj):
     return print(json.dumps(json_obj, indent=4))
+
+
+def format_number(curr_num, match_num):
+
+    curr_num_str = f'{curr_num}'
+    match_num_str = f'{match_num}'
+
+    if '.' in match_num_str:
+        match_dec = len(match_num_str.split('.')[1])
+        curr_num_str = f'{curr_num:.{match_dec}f}'
+        curr_num_str = curr_num_str[:]
+    else:
+        return f'{int(curr_num)}'
+    
+    return curr_num_str

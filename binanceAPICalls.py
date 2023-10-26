@@ -1,12 +1,13 @@
-import os
 import logging
+import time
 import pandas as pd
 import numpy as np
 
-from functions import initiate_logger, validate_key
+from functions import initiate_logger, validate_key, format_number
 from binance.client import Client
 from dotenv import load_dotenv
 from datetime import datetime as dt
+from constants import *
 
 class BinanceAPICalls:
     def __init__(self, testnet):
@@ -20,27 +21,18 @@ class BinanceAPICalls:
         site = 'TestNet' if self.testnet else 'Live'
         self.logger.info(f'[START] Initiating login to {site} API')
 
-        # Load in and validate keys
-        load_dotenv()
-        if self.testnet == False:
-            api_key = os.environ['API_KEY']
-            api_secret = os.environ['SECRET_KEY']
-            validate_key(self.logger, api_key,api_secret)
-            self.logger.info('[DEQUEUED] Test keys saved.')
-        else:    
-            api_key = os.environ['TEST_API_KEY']
-            api_secret = os.environ['TEST_SECRET_KEY']
-            validate_key(self.logger, api_key,api_secret)
-            self.logger.info('[DEQUEUED] Live keys saved.')
+        # Vlidate keys
+        validate_key(self.logger, KEY, SECRET)
+        self.logger.info('[DEQUEUED] Test keys saved.')
 
         # Initiate Binance API
         try:
-            client = Client(api_key, api_secret, testnet=self.testnet)
+            client = Client(KEY, SECRET, testnet=self.testnet)
             client.get_account()
             self.logger.info(f'[COMPLETE] Connected to {site} API.')
         except Exception:
             self.logger.exception(f'[ERROR] Failed to connect to the {site} API.')
-            raise
+            exit(1)
 
         return client    
     
@@ -52,6 +44,7 @@ class BinanceAPICalls:
             self.logger.info('[COMPLETE] Account information saved.')
         except:
             self.logger.exception('[ERROR] Unable to fetch account details.')
+            exit(1)
 
         return info
     
@@ -69,6 +62,7 @@ class BinanceAPICalls:
                 self.logger.info(f'[COMPLETE] Balance information saved: {info_print}')
             except: 
                 self.logger.exception(f'[ERROR] Unable to fetch asset balances {asset}.')
+                exit(1)
         else:
             try:
                 info = client.get_asset_balance(asset=asset)
@@ -76,6 +70,7 @@ class BinanceAPICalls:
                 self.logger.info(f'[COMPLETE] Balance information saved: {info_print}')
             except:
                 self.logger.exception(f'[ERROR] Unable to fetch asset balance {asset}.')
+                exit(1)
 
         return info
     
@@ -98,25 +93,74 @@ class BinanceAPICalls:
                 self.logger.info(f'[SUCCESS] {i} data downloaded.')
             except:
                 self.logger.exception(f'[ERROR] Unable to fetch data for symbol: {i}')
+                exit(1)
         self.logger.info(f'[COMPLETE] Close prices for following symbols have been downloaded and stored: {symbols}')
         
         return data, returns
     
 
-    def place_market_order(self,client, symbol, side, order_type, quantity):
+    def place_market_order(self,client, symbol, side, quantity, price):
 
-        self.logger.info(f'[START] Initiating trade order: Symbol: {symbol}; Quantity: {quantity}; Side: {side}; Type: {order_type}')
+        self.logger.info(f'[START] Initiating trade order: Symbol: {symbol}; Quantity: {quantity}; Price: {price}; Side: {side}.')
         try:
             order = client.order_market_buy(symbol=symbol,
-                                    side=side,
-                                    type=order_type,
-                                    quantity=quantity)
+                                            side=side,
+                                            price=price,
+                                            quantity=quantity)
             self.logger.info(f'[COMPLETE] Order placed.')
         except:
             self.logger.exception('[ERROR] Unable to place order.')
             exit(1)
         
         return order
+    
+    def abort_all_positions(self, client):
+
+        '''
+        FILL IN: Issue is with Binance Spot trading, you cannot
+        "close" positions as they are filled auto. Need to find
+        logic to reverse previous previous trades.
+        '''
+
+        self.logger.info('[START] Closing all positions.')
+        try:
+            # Get all positions
+            all_positions = 1
+
+            # Handle open positions
+            close_orders = []
+            if len(all_positions) > 0:
+                # Loop through each position
+                for position in all_positions:
+                    # Determine tick size
+                    market = 1
+
+                    # Determine side
+                    side = 'BUY'
+                    if position['side'] == 'LONG':
+                        side = 'SELL'
+
+                    # Get price
+                    price = float(position['Price'])
+                    accept_price = price * 1.3 if side == 'BUY' else price * 0.7
+                    tick_size = market['tickSize']
+                    accept_price = format_number(accept_price, tick_size)
+
+                    # Place inverse order
+                    #order  = self.place_market_order(self.client, symbol, side, quantity)
+
+                    # Append result to close_orders
+                    #close_orders.append(orders)
+
+                    # Protect API
+                    time.sleep(0.2)
+
+
+        except:
+            self.logger.exception('[ERROR] Unable to close all positons.')
+            exit(1)
+
+        return
     
     def get_order_info(self, client, order):
 
@@ -128,5 +172,6 @@ class BinanceAPICalls:
             self.logger.info(f'[COMPLETE] Order {orderId} information retrieved.')
         except:
             self.logger.exception('[ERROR] Unable to find trade.')
+            exit(1)
 
         return info

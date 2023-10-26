@@ -1,8 +1,10 @@
-from binanceAPICalls import BinanceAPICalls
-from functions import print_json
 import matplotlib.pyplot as plt
 
+from binanceAPICalls import BinanceAPICalls
+from functions import print_json
 from statsmodels.tsa.stattools import coint
+from binance.enums import *
+from constants import *
 
 
 # Download close prices for symbols
@@ -10,15 +12,15 @@ from statsmodels.tsa.stattools import coint
 
 
 # Connect to Binance
-API = BinanceAPICalls(True)
+API = BinanceAPICalls(True if MODE == 'TEST' else False)
 client = API.api_login()
 
 # Place market order to open/close positons
-order = API.place_market_order(client, symbol='BTCBUSD', side='SELL', order_type='MARKET', quantity=0.0005)
-info = API.get_order_info(client, order)
+
 
 # Abort all open orders
-
+if ABORT_ALL_POSITIONS:
+    close_orders = API.abort_all_positions(client)
 
 # Construct market prices to build table
 
