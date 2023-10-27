@@ -8,6 +8,8 @@ from binance.client import Client
 from datetime import datetime as dt
 from constants import KEY, SECRET
 
+
+
 class BinanceAPICalls:
     def __init__(self, testnet):
         logging.basicConfig(level=logging.DEBUG, filename='logs/api_log.log', format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
@@ -40,12 +42,20 @@ class BinanceAPICalls:
         self.logger.info(f'[START] Accessing account balance infromation.') 
         try:
             info = client.get_account()
-            self.logger.info('[COMPLETE] Account information saved.')
+            balances = []
+            for i in info['balances']:
+                if float(i['free']) > 0:
+                    balances.append(i)
+            
+            if len(balances) == 0:
+                self.logger.info('[COMPLETE] No holdings to retrieve.')
+            else:
+                self.logger.info('[COMPLETE] Account information saved.')
         except:
             self.logger.exception('[ERROR] Unable to fetch account details.')
             exit(1)
 
-        return info
+        return balances
     
     def balance(self, client, asset):
 
