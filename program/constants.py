@@ -1,7 +1,7 @@
 from decouple import config
 
 # SELECT MODE
-MODE = 'DEVELOPMENT'
+MODE = 'TEST'
 
 # Close all open positions and orders
 ABORT_ALL_POSITIONS = False

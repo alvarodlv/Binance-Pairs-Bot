@@ -1,3 +1,4 @@
+import json
 import matplotlib.pyplot as plt
 
 from binanceAPICalls import BinanceAPICalls
@@ -14,8 +15,8 @@ from constants import MODE, ABORT_ALL_POSITIONS
 # Connect to Binance
 API = BinanceAPICalls(True if MODE == 'TEST' else False)
 client = API.api_login()
-info = API.account(client)
-print(info)
+balance = API.account(client)
+
 # Place market order to open/close positons
 
 
